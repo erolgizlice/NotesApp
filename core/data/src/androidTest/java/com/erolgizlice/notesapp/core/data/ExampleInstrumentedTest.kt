@@ -1,4 +1,4 @@
-package com.erolgizlice.notesapp
+package com.erolgizlice.notesapp.core.data
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -17,6 +17,6 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("com.erolgizlice.notesapp", appContext.packageName)
+        assertEquals("com.erolgizlice.notesapp.core.data.test", appContext.packageName)
     }
 }
