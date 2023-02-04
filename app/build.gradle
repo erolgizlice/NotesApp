@@ -89,6 +89,8 @@ dependencies {
 //    implementation 'com.google.firebase:firebase-analytics-ktx:21.2.0'
     implementation 'androidx.core:core-ktx:+'
     implementation project(path: ':core:data')
+    implementation project(path: ':feature:todo')
+    implementation project(path: ':feature:notes')
     kapt("com.google.dagger:hilt-android-compiler:2.44.2")
 //    implementation 'androidx.hilt:hilt-work:1.0.0'
 
