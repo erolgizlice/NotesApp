@@ -1,5 +1,6 @@
 package com.erolgizlice.notesapp.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -27,17 +28,17 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.erolgizlice.notesapp.core.data.util.NetworkMonitor
+import com.erolgizlice.notesapp.core.designsystem.theme.BlackBackground
+import com.erolgizlice.notesapp.core.designsystem.theme.BlackGrey
+import com.erolgizlice.notesapp.core.designsystem.theme.WhiteContent
 import com.erolgizlice.notesapp.navigation.NotesNavHost
 import com.erolgizlice.notesapp.navigation.NotesTabs
-import com.erolgizlice.notesapp.ui.theme.BlackGrey
-import com.erolgizlice.notesapp.ui.theme.WhiteContent
 
 @Composable
 fun NotesApp(
     networkMonitor: NetworkMonitor,
     appState: NotesAppState = rememberNotesAppState(networkMonitor)
 ) {
-    Surface {
         val snackbarHostState = remember { SnackbarHostState() }
 
         val isOffline by appState.isOffline.collectAsStateWithLifecycle()
@@ -81,13 +82,13 @@ fun NotesApp(
         ) { paddingValues ->
             Surface {
                 NotesNavHost(
-                    modifier = Modifier.padding(paddingValues),
+                    modifier = Modifier
+                        .background(color = Color(0xFF1C1B1F)),
                     navController = appState.navController,
                     onBackClick = appState::onBackClick
                 )
             }
         }
-    }
 }
 
 @Composable
@@ -131,7 +132,7 @@ fun NotesBottomBar(
                                 left = ((width - outlineWidth) / 1.03).toFloat(),
                                 top = (-outlineHeight / 1.5).toFloat()
                             )
-                        }
+                         }
                     ) {
                         drawOutline(
                             outline = outline,

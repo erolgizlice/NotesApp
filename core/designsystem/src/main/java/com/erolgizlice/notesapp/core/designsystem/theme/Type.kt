@@ -1,4 +1,4 @@
-package com.erolgizlice.notesapp.ui.theme
+package com.erolgizlice.notesapp.core.designsystem.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

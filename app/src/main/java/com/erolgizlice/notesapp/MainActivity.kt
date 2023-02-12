@@ -7,8 +7,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.erolgizlice.notesapp.core.data.util.NetworkMonitor
+import com.erolgizlice.notesapp.core.designsystem.theme.NotesAppTheme
 import com.erolgizlice.notesapp.ui.NotesApp
-import com.erolgizlice.notesapp.ui.theme.NotesAppTheme
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 

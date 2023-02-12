@@ -1,4 +1,4 @@
-package com.erolgizlice.notesapp.ui.theme
+package com.erolgizlice.notesapp.core.designsystem.theme
 
 import android.app.Activity
 import android.os.Build

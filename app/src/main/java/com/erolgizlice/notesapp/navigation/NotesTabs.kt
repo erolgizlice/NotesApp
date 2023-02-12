@@ -33,7 +33,7 @@ enum class NotesTabs(
 private object NotesDestinations {
     const val TODO_ROUTE = "notes/todo"
     const val MIC_ROUTE = "notes/mic"
-    const val GALLERY_ROUTE = "notes/mic"
+    const val GALLERY_ROUTE = "notes/gallery"
 }
 
 object MainNotesDestinations {

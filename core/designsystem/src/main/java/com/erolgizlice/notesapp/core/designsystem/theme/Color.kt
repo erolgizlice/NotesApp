@@ -1,4 +1,4 @@
-package com.erolgizlice.notesapp.ui.theme
+package com.erolgizlice.notesapp.core.designsystem.theme
 
 import androidx.compose.ui.graphics.Color
 
@@ -11,5 +11,6 @@ val PurpleGrey40 = Color(0xFF625b71)
 val Pink40 = Color(0xFF7D5260)
 
 val BlackGrey = Color(0xFF2A2930)
-val BlackBackground = Color(0xFF2A2930)
+val BlackBackground = Color(0xFF1C1B1F)
 val WhiteContent = Color(0xFFC7C4CE)
+val SearchColor = Color(0xFF28272E)
