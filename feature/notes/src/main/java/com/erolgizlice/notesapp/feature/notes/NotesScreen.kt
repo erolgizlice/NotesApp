@@ -15,10 +15,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import com.erolgizlice.notesapp.core.designsystem.component.TextFieldHint
 import com.erolgizlice.notesapp.core.designsystem.theme.SearchColor
 import com.erolgizlice.notesapp.core.designsystem.theme.WhiteContent
+import com.erolgizlice.notesapp.notes.R
 
 @Composable
 internal fun NotesRoute(
@@ -40,18 +43,53 @@ internal fun NotesRoute(
             onClearQuery = {
                 focusManager.clearFocus()
                 state.query = TextFieldValue("")
-                state.focused = false
             },
             searching = state.searching
         )
-        Card(
-            modifier = modifier.padding(top = 16.dp),
-            shape = RoundedCornerShape(8.dp),
-            backgroundColor = WhiteContent
-        ) {
-            Column(modifier = Modifier.padding(8.dp)) {
-                Text(text = "Title")
-                Text(text = "Content")
+        LaunchedEffect(state.query.text) {
+            state.searching = true
+            state.searchResults = allNotes.filter {
+                it.title.contains(state.query.text, ignoreCase = true) ||
+                        it.content.contains(state.query.text, ignoreCase = true)
+            }
+            state.searching = false
+        }
+        when (state.searchDisplay) {
+            SearchDisplay.Categories -> {
+                Card(
+                    modifier = modifier.padding(top = 16.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    backgroundColor = WhiteContent
+                ) {
+                    Column(modifier = Modifier.padding(8.dp)) {
+                        Text(text = "Categories")
+                        Text(text = "Content")
+                    }
+                }
+            }
+            SearchDisplay.Results -> {
+                Card(
+                    modifier = modifier.padding(top = 16.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    backgroundColor = WhiteContent
+                ) {
+                    Column(modifier = Modifier.padding(8.dp)) {
+                        Text(text = "Title")
+                        Text(text = "Content")
+                    }
+                }
+            }
+            SearchDisplay.NoResults -> {
+                Card(
+                    modifier = modifier.padding(top = 16.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    backgroundColor = WhiteContent
+                ) {
+                    Column(modifier = Modifier.padding(8.dp)) {
+                        Text(text = "No Result")
+                        Text(text = "Content")
+                    }
+                }
             }
         }
     }
@@ -77,7 +115,14 @@ private fun SearchBar(
     ) {
         Box(Modifier.fillMaxSize()) {
             if (query.text.isEmpty()) {
-                SearchHint()
+                TextFieldHint(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .wrapContentHeight(),
+                    placeholder = stringResource(id = R.string.placeholder_search),
+                    textStyle = MaterialTheme.typography.body1.copy(color = WhiteContent),
+                    isSearch = true
+                )
             }
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -137,22 +182,6 @@ private fun SearchBar(
 }
 
 @Composable
-private fun SearchHint() {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxHeight()
-            .wrapContentHeight()
-    ) {
-        Spacer(Modifier.width(48.dp))
-        Text(
-            text = "Search your notes",
-            color = WhiteContent
-        )
-    }
-}
-
-@Composable
 private fun rememberSearchState(
     query: TextFieldValue = TextFieldValue(""),
     focused: Boolean = false,
@@ -180,6 +209,16 @@ class SearchState(
     var focused by mutableStateOf(focused)
     var searching by mutableStateOf(searching)
     var searchResults by mutableStateOf(searchResults)
+    val searchDisplay: SearchDisplay
+        get() = when {
+            focused && query.text.isEmpty() -> SearchDisplay.Categories
+            searchResults.isEmpty() -> SearchDisplay.NoResults
+            else -> SearchDisplay.Results
+        }
+}
+
+enum class SearchDisplay {
+    Categories, Results, NoResults
 }
 
 data class Note(

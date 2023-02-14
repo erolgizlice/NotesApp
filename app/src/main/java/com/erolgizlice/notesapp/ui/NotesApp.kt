@@ -28,9 +28,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.erolgizlice.notesapp.core.data.util.NetworkMonitor
-import com.erolgizlice.notesapp.core.designsystem.theme.BlackBackground
 import com.erolgizlice.notesapp.core.designsystem.theme.BlackGrey
 import com.erolgizlice.notesapp.core.designsystem.theme.WhiteContent
+import com.erolgizlice.notesapp.feature.addeditnote.navigation.navigateToAddEditNote
 import com.erolgizlice.notesapp.navigation.NotesNavHost
 import com.erolgizlice.notesapp.navigation.NotesTabs
 
@@ -56,28 +56,32 @@ fun NotesApp(
             contentColor = MaterialTheme.colorScheme.onBackground,
             snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
             floatingActionButton = {
-                FloatingActionButton(
-                    modifier = Modifier.padding(bottom = 20.dp),
-                    onClick = { /* TODO */ },
-                    shape = FloatingActionButtonDefaults.shape,
-                    containerColor = BlackGrey,
-                    contentColor = WhiteContent,
-                    elevation = FloatingActionButtonDefaults.bottomAppBarFabElevation()
-                ) {
-                    Icon(
-                        modifier = Modifier.size(40.dp),
-                        imageVector = Icons.Filled.Add,
-                        contentDescription = null
-                    )
+                if (appState.shouldShowBottomBar) {
+                    FloatingActionButton(
+                        modifier = Modifier.padding(bottom = 20.dp),
+                        onClick = { appState.navController.navigateToAddEditNote() },
+                        shape = FloatingActionButtonDefaults.shape,
+                        containerColor = BlackGrey,
+                        contentColor = WhiteContent,
+                        elevation = FloatingActionButtonDefaults.bottomAppBarFabElevation()
+                    ) {
+                        Icon(
+                            modifier = Modifier.size(40.dp),
+                            imageVector = Icons.Filled.Add,
+                            contentDescription = null
+                        )
+                    }
                 }
             },
             floatingActionButtonPosition = FabPosition.End,
             isFloatingActionButtonDocked = true,
             bottomBar = {
-                NotesBottomBar(
-                    destinations = appState.notesTabs,
-                    onNavigateToDestination = appState::navigateToNotesDestination,
-                )
+                if (appState.shouldShowBottomBar) {
+                    NotesBottomBar(
+                        destinations = appState.notesTabs,
+                        onNavigateToDestination = appState::navigateToNotesDestination,
+                    )
+                }
             }
         ) { paddingValues ->
             Surface {
@@ -132,7 +136,7 @@ fun NotesBottomBar(
                                 left = ((width - outlineWidth) / 1.03).toFloat(),
                                 top = (-outlineHeight / 1.5).toFloat()
                             )
-                         }
+                        }
                     ) {
                         drawOutline(
                             outline = outline,

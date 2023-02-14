@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
+import com.erolgizlice.notesapp.feature.addeditnote.navigation.addEditNoteScreen
 import com.erolgizlice.notesapp.feature.notes.navigation.notesNavigationRoute
 import com.erolgizlice.notesapp.feature.notes.navigation.notesScreen
 import com.erolgizlice.notesapp.feature.todo.navigation.todoScreen
@@ -22,5 +23,6 @@ fun NotesNavHost(
     ) {
         notesScreen()
         todoScreen()
+        addEditNoteScreen()
     }
 }

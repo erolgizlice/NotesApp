@@ -11,6 +11,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
 import androidx.tracing.trace
 import com.erolgizlice.notesapp.core.data.util.NetworkMonitor
+import com.erolgizlice.notesapp.feature.notes.navigation.notesNavigationRoute
 import com.erolgizlice.notesapp.feature.todo.navigation.navigateToTODO
 import com.erolgizlice.notesapp.navigation.NotesTabs
 import kotlinx.coroutines.CoroutineScope
@@ -45,6 +46,9 @@ class NotesAppState(
             started = SharingStarted.WhileSubscribed(5_000),
             initialValue = false
         )
+
+    val shouldShowBottomBar: Boolean
+        @Composable get() = currentDestination?.route.equals(notesNavigationRoute)
 
     val notesTabs: List<NotesTabs> = NotesTabs.values().asList()
 
