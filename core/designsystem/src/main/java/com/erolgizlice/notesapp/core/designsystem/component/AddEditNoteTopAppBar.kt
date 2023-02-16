@@ -15,9 +15,9 @@ import androidx.compose.ui.Modifier
 import com.erolgizlice.notesapp.core.designsystem.theme.WhiteContent
 
 @Composable
-fun AddEditNoteTopAppBar() {
+fun AddEditNoteTopAppBar(onEventSaveNote: () -> Unit) {
     Row {
-        IconButton(onClick = { /*TODO*/ }) {
+        IconButton(onClick = { onEventSaveNote() }) {
             Icon(
                 imageVector = Icons.Outlined.ArrowBack,
                 tint = WhiteContent,

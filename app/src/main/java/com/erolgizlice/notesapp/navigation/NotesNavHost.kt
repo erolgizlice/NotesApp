@@ -23,6 +23,8 @@ fun NotesNavHost(
     ) {
         notesScreen()
         todoScreen()
-        addEditNoteScreen()
+        addEditNoteScreen(
+            onBackClick = navController::popBackStack
+        )
     }
 }

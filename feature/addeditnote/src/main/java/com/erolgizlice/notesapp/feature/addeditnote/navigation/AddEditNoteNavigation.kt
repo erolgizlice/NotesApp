@@ -12,8 +12,10 @@ fun NavController.navigateToAddEditNote(navOptions: NavOptions? = null) {
     this.navigate(addEditNoteNavigationRoute, navOptions)
 }
 
-fun NavGraphBuilder.addEditNoteScreen() {
+fun NavGraphBuilder.addEditNoteScreen(
+    onBackClick: () -> Unit
+) {
     composable(route = addEditNoteNavigationRoute) {
-        AddEditNoteRoute()
+        AddEditNoteRoute(onBackClick = onBackClick)
     }
 }
