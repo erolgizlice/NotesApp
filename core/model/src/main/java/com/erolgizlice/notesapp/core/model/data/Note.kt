@@ -7,7 +7,8 @@ data class Note(
     val title: String = "",
     val content: String = "",
     val color: Int = -1,
-    val timestamp: Long? = null
+    val timestamp: Long? = null,
+    val isPinned: Boolean = false
 ) {
 
     companion object {

@@ -42,6 +42,9 @@ class AddEditNoteViewModel @Inject constructor(
     private val _noteColor = mutableStateOf(Note.noteColors.random().toArgb())
     val noteColor: State<Int> = _noteColor
 
+    private val _notePinned = mutableStateOf(false)
+    val notePinned: State<Boolean> = _notePinned
+
     private val _eventFlow = MutableSharedFlow<UiEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
 
@@ -65,6 +68,7 @@ class AddEditNoteViewModel @Inject constructor(
                             isHintVisible = false
                         )
                         _noteColor.value = note.color
+                        _notePinned.value = note.isPinned
                     }
                 }
             }
@@ -110,7 +114,8 @@ class AddEditNoteViewModel @Inject constructor(
                                     content = noteContent.value.text,
                                     timestamp = System.currentTimeMillis(),
                                     color = noteColor.value,
-                                    id = currentNoteId
+                                    id = currentNoteId,
+                                    isPinned = notePinned.value
                                 )
                             )
                         }
@@ -144,11 +149,15 @@ class AddEditNoteViewModel @Inject constructor(
                             title = noteTitle.value.text,
                             content = noteContent.value.text,
                             timestamp = System.currentTimeMillis(),
-                            color = noteColor.value
+                            color = noteColor.value,
+                            isPinned = notePinned.value
                         )
                     )
                     _eventFlow.emit(UiEvent.CopyNote)
                 }
+            }
+            is AddEditNoteEvent.PinNote -> {
+                _notePinned.value = !_notePinned.value
             }
         }
     }

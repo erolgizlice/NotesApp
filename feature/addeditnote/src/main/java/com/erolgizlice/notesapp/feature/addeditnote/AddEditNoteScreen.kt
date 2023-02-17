@@ -42,6 +42,7 @@ fun AddEditNoteRoute(
 ) {
     val titleState = viewModel.noteTitle.value
     val contentState = viewModel.noteContent.value
+    val isPinned by viewModel.notePinned
 
     val scaffoldState = rememberScaffoldState()
 
@@ -85,7 +86,8 @@ fun AddEditNoteRoute(
         modalSheetState = modalSheetState,
         color = noteBackgroundAnimatable,
         scope = scope,
-        note = viewModel.currentNote.value
+        note = viewModel.currentNote.value,
+        isPinned = isPinned
     )
 }
 
@@ -100,7 +102,8 @@ fun AddEditNoteScreen(
     modalSheetState: ModalBottomSheetState,
     color: Animatable<Color, AnimationVector4D>,
     note: Note,
-    scope: CoroutineScope
+    scope: CoroutineScope,
+    isPinned: Boolean
 ) {
     val context = LocalContext.current
     val isColor = remember { mutableStateOf(false) }
@@ -164,7 +167,9 @@ fun AddEditNoteScreen(
             modifier = modifier.fillMaxSize()
         ) {
             AddEditNoteTopAppBar(
-                onEventSaveNote = { onEvent(AddEditNoteEvent.SaveNote) }
+                isPinned = isPinned,
+                onBackClick = { onEvent(AddEditNoteEvent.SaveNote) },
+                onPinClick = { onEvent(AddEditNoteEvent.PinNote) }
             )
             Box(
                 Modifier.padding(horizontal = 16.dp, vertical = 24.dp)

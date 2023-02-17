@@ -9,5 +9,6 @@ fun Note.asEntityModel() = NoteEntity(
     title = title,
     content = content,
     color = color,
-    timestamp = timestamp
+    timestamp = timestamp,
+    isPinned = isPinned
 )

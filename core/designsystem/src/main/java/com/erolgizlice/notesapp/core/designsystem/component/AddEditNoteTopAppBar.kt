@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.outlined.AddAlert
 import androidx.compose.material.icons.outlined.Archive
 import androidx.compose.material.icons.outlined.ArrowBack
@@ -15,9 +16,13 @@ import androidx.compose.ui.Modifier
 import com.erolgizlice.notesapp.core.designsystem.theme.WhiteContent
 
 @Composable
-fun AddEditNoteTopAppBar(onEventSaveNote: () -> Unit) {
+fun AddEditNoteTopAppBar(
+    isPinned: Boolean,
+    onBackClick: () -> Unit,
+    onPinClick: () -> Unit,
+) {
     Row {
-        IconButton(onClick = { onEventSaveNote() }) {
+        IconButton(onClick = onBackClick) {
             Icon(
                 imageVector = Icons.Outlined.ArrowBack,
                 tint = WhiteContent,
@@ -28,9 +33,12 @@ fun AddEditNoteTopAppBar(onEventSaveNote: () -> Unit) {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.End
         ) {
-            IconButton(onClick = { /*TODO*/ }) {
+            IconButton(onClick = onPinClick) {
                 Icon(
-                    imageVector = Icons.Outlined.PushPin,
+                    imageVector = if (isPinned)
+                        Icons.Filled.PushPin
+                    else
+                        Icons.Outlined.PushPin,
                     tint = WhiteContent,
                     contentDescription = null
                 )

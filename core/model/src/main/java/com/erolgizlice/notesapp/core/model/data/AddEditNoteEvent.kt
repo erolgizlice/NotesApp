@@ -22,4 +22,5 @@ sealed class AddEditNoteEvent {
     object RestoreNote: AddEditNoteEvent()
 
     object CopyNote: AddEditNoteEvent()
+    object PinNote: AddEditNoteEvent()
 }

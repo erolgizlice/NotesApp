@@ -95,24 +95,35 @@ fun NotesScreen(
                 }
             }
             SearchDisplay.Results -> {
-                LazyVerticalGrid(
-                    modifier = Modifier
-                        .padding(4.dp),
-                    columns = GridCells.Fixed(2),
-                    contentPadding = PaddingValues(4.dp)
-                ) {
-                    items(searchState.searchResults) {note ->
-                        NoteItem(
-                            modifier = modifier
-                                .padding(4.dp)
-                                .clickable {
-                                    note.id?.let { onNoteClick(it, note.color) }
-                                },
-                            title = note.title,
-                            content = note.content,
-                            color = note.color
+                if (searchState.searchResults.filter { it.isPinned }.isNotEmpty()) {
+                    Text(
+                        modifier = Modifier.padding(start = 12.dp),
+                        text = "Pinned",
+                        color = WhiteContent
+                    )
+                    ShowResults(
+                        modifier = modifier,
+                        resultList = searchState.searchResults.filter { it.isPinned },
+                        onNoteClick = onNoteClick
+                    )
+                    if (searchState.searchResults.filterNot { it.isPinned }.isNotEmpty()) {
+                        Text(
+                            modifier = Modifier.padding(start = 12.dp),
+                            text = "Others",
+                            color = WhiteContent
+                        )
+                        ShowResults(
+                            modifier = modifier,
+                            resultList = searchState.searchResults.filterNot { it.isPinned },
+                            onNoteClick = onNoteClick
                         )
                     }
+                } else {
+                    ShowResults(
+                        modifier = modifier,
+                        resultList = searchState.searchResults,
+                        onNoteClick = onNoteClick
+                    )
                 }
             }
             SearchDisplay.NoResults -> {
@@ -127,6 +138,33 @@ fun NotesScreen(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun ShowResults(
+    modifier: Modifier,
+    resultList: List<Note>,
+    onNoteClick: (Int, Int) -> Unit
+) {
+    LazyVerticalGrid(
+        modifier = Modifier
+            .padding(4.dp),
+        columns = GridCells.Fixed(2),
+        contentPadding = PaddingValues(4.dp)
+    ) {
+        items(resultList) { note ->
+            NoteItem(
+                modifier = modifier
+                    .padding(4.dp)
+                    .clickable {
+                        note.id?.let { onNoteClick(it, note.color) }
+                    },
+                title = note.title,
+                content = note.content,
+                color = note.color
+            )
         }
     }
 }
