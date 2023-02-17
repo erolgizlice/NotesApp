@@ -12,8 +12,12 @@ fun NavController.navigateToNotes(navOptions: NavOptions? = null) {
     this.navigate(notesNavigationRoute, navOptions)
 }
 
-fun NavGraphBuilder.notesScreen() {
+fun NavGraphBuilder.notesScreen(
+    onNoteClick: (Int, Int) -> Unit
+) {
     composable(route = notesNavigationRoute) {
-        NotesRoute()
+        NotesRoute(
+            onNoteClick = onNoteClick
+        )
     }
 }

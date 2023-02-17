@@ -17,7 +17,7 @@ class OfflineFirstNotesRepository @Inject constructor(
         noteDao.getNoteEntityList()
             .map { it.map(NoteEntity::asExternalModel) }
 
-    override fun getNote(id: String): Note? =
+    override suspend fun getNote(id: Int): Note? =
         noteDao.getNoteEntity(id)?.asExternalModel()
 
     override suspend fun insertNote(note: Note) {

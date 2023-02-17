@@ -11,7 +11,7 @@ interface NoteDao {
     fun getNoteEntityList(): Flow<List<NoteEntity>>
 
     @Query("SELECT * FROM notes WHERE id = :noteId")
-    fun getNoteEntity(noteId: String): NoteEntity?
+    suspend fun getNoteEntity(noteId: Int): NoteEntity?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertNoteEntity(note: NoteEntity)

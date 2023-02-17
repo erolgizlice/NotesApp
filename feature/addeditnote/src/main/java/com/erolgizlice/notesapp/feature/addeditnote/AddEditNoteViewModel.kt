@@ -44,8 +44,8 @@ class AddEditNoteViewModel @Inject constructor(
     private var currentNoteId: Int? = null
 
     init {
-        savedStateHandle.get<String>("noteId")?.let { noteId ->
-            if (noteId.isNotEmpty()) {
+        savedStateHandle.get<Int>("noteId")?.let { noteId ->
+            if (noteId != -1) {
                 viewModelScope.launch {
                     noteUseCases.getNoteUseCase(noteId)?.also { note ->
                         currentNoteId = note.id
@@ -94,15 +94,19 @@ class AddEditNoteViewModel @Inject constructor(
             is AddEditNoteEvent.SaveNote -> {
                 viewModelScope.launch {
                     try {
-                        noteUseCases.addNoteUseCase(
-                            Note(
-                                title = noteTitle.value.text,
-                                content = noteContent.value.text,
-                                timestamp = System.currentTimeMillis(),
-                                color = noteColor.value,
-                                id = currentNoteId
+                        if ((noteTitle.value.text.isNotEmpty() && noteTitle.value.text.isNotBlank()) ||
+                            (noteContent.value.text.isNotEmpty() && noteContent.value.text.isNotBlank())
+                        ) {
+                            noteUseCases.addNoteUseCase(
+                                Note(
+                                    title = noteTitle.value.text,
+                                    content = noteContent.value.text,
+                                    timestamp = System.currentTimeMillis(),
+                                    color = noteColor.value,
+                                    id = currentNoteId
+                                )
                             )
-                        )
+                        }
                         _eventFlow.emit(UiEvent.SaveNote)
                     } catch (e: InvalidNoteException) {
                         _eventFlow.emit(

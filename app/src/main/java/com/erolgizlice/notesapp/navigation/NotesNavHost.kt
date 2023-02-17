@@ -5,6 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import com.erolgizlice.notesapp.feature.addeditnote.navigation.addEditNoteScreen
+import com.erolgizlice.notesapp.feature.addeditnote.navigation.navigateToAddEditNote
 import com.erolgizlice.notesapp.feature.notes.navigation.notesNavigationRoute
 import com.erolgizlice.notesapp.feature.notes.navigation.notesScreen
 import com.erolgizlice.notesapp.feature.todo.navigation.todoScreen
@@ -21,7 +22,14 @@ fun NotesNavHost(
         startDestination = startDestination,
         modifier = modifier
     ) {
-        notesScreen()
+        notesScreen(
+            onNoteClick = { noteId, noteColor ->
+                navController.navigateToAddEditNote(
+                    noteId = noteId,
+                    noteColor = noteColor
+                )
+            }
+        )
         todoScreen()
         addEditNoteScreen(
             onBackClick = navController::popBackStack

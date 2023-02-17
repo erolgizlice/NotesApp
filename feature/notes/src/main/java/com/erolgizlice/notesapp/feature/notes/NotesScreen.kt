@@ -1,6 +1,10 @@
 package com.erolgizlice.notesapp.feature.notes
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.*
@@ -18,43 +22,66 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.erolgizlice.notesapp.core.designsystem.component.NoteItem
 import com.erolgizlice.notesapp.core.designsystem.component.TextFieldHint
 import com.erolgizlice.notesapp.core.designsystem.theme.SearchColor
 import com.erolgizlice.notesapp.core.designsystem.theme.WhiteContent
+import com.erolgizlice.notesapp.core.model.data.Note
 import com.erolgizlice.notesapp.notes.R
 
 @Composable
 internal fun NotesRoute(
     modifier: Modifier = Modifier,
-    state: SearchState = rememberSearchState()
+    onNoteClick: (Int, Int) -> Unit,
+    viewModel: NotesViewModel = hiltViewModel(),
+    searchState: SearchState = rememberSearchState()
+) {
+    val notesState by viewModel.state
+
+    NotesScreen(
+        modifier = modifier
+            .fillMaxSize(),
+        notesState = notesState,
+        searchState = searchState.apply { searchResults = notesState.notes },
+        onNoteClick = onNoteClick
+    )
+}
+
+@Composable
+fun NotesScreen(
+    modifier: Modifier,
+    notesState: NotesViewModel.NotesState,
+    searchState: SearchState,
+    onNoteClick: (Int, Int) -> Unit
 ) {
     val focusManager = LocalFocusManager.current
 
     Column(
         modifier = modifier
-            .padding(16.dp)
-            .fillMaxSize()
     ) {
         SearchBar(
-            query = state.query,
-            onQueryChange = { state.query = it },
-            searchFocused = state.focused,
-            onSearchFocusChange = { state.focused = it },
+            modifier = Modifier
+                .padding(16.dp),
+            query = searchState.query,
+            onQueryChange = { searchState.query = it },
+            searchFocused = searchState.focused,
+            onSearchFocusChange = { searchState.focused = it },
             onClearQuery = {
                 focusManager.clearFocus()
-                state.query = TextFieldValue("")
+                searchState.query = TextFieldValue("")
             },
-            searching = state.searching
+            searching = searchState.searching
         )
-        LaunchedEffect(state.query.text) {
-            state.searching = true
-            state.searchResults = allNotes.filter {
-                it.title.contains(state.query.text, ignoreCase = true) ||
-                        it.content.contains(state.query.text, ignoreCase = true)
+        LaunchedEffect(searchState.query.text) {
+            searchState.searching = true
+            searchState.searchResults = notesState.notes.filter {
+                it.title.contains(searchState.query.text, ignoreCase = true) ||
+                        it.content.contains(searchState.query.text, ignoreCase = true)
             }
-            state.searching = false
+            searchState.searching = false
         }
-        when (state.searchDisplay) {
+        when (searchState.searchDisplay) {
             SearchDisplay.Categories -> {
                 Card(
                     modifier = modifier.padding(top = 16.dp),
@@ -68,14 +95,23 @@ internal fun NotesRoute(
                 }
             }
             SearchDisplay.Results -> {
-                Card(
-                    modifier = modifier.padding(top = 16.dp),
-                    shape = RoundedCornerShape(8.dp),
-                    backgroundColor = WhiteContent
+                LazyVerticalGrid(
+                    modifier = Modifier
+                        .padding(4.dp),
+                    columns = GridCells.Fixed(2),
+                    contentPadding = PaddingValues(4.dp)
                 ) {
-                    Column(modifier = Modifier.padding(8.dp)) {
-                        Text(text = "Title")
-                        Text(text = "Content")
+                    items(searchState.searchResults) {note ->
+                        NoteItem(
+                            modifier = modifier
+                                .padding(4.dp)
+                                .clickable {
+                                    note.id?.let { onNoteClick(it, note.color) }
+                                },
+                            title = note.title,
+                            content = note.content,
+                            color = note.color
+                        )
                     }
                 }
             }
@@ -220,42 +256,3 @@ class SearchState(
 enum class SearchDisplay {
     Categories, Results, NoResults
 }
-
-data class Note(
-    val id: Int,
-    val title: String,
-    val content: String,
-    val color: Int,
-    val timestamp: Long
-)
-
-private val allNotes = listOf(
-    Note(
-        id = 1,
-        title = "asdasdasd",
-        content = "asdasdsfsdfsdf",
-        color = 1,
-        timestamp = 1
-    ),
-    Note(
-        id = 1,
-        title = "asdasdasd",
-        content = "asdasdsfsdfsdf",
-        color = 1,
-        timestamp = 1
-    ),
-    Note(
-        id = 1,
-        title = "asdasdasd",
-        content = "asdasdsfsdfsdf",
-        color = 1,
-        timestamp = 1
-    ),
-    Note(
-        id = 1,
-        title = "asdasdasd",
-        content = "asdasdsfsdfsdf",
-        color = 1,
-        timestamp = 1
-    )
-)
