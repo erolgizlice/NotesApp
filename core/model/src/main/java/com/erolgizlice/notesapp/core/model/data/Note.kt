@@ -4,14 +4,14 @@ import com.erolgizlice.notesapp.core.designsystem.theme.*
 
 data class Note(
     val id: Int? = null,
-    val title: String,
-    val content: String,
-    val color: Int,
-    val timestamp: Long
+    val title: String = "",
+    val content: String = "",
+    val color: Int = -1,
+    val timestamp: Long? = null
 ) {
 
     companion object {
-        val noteColors = listOf(RedOrange, LightGreen, Violet, BabyBlue, RedPink)
+        val noteColors = listOf(BlackNote, RedNote, BrownNote, OrangeNote, GreenNote)
     }
 }
 

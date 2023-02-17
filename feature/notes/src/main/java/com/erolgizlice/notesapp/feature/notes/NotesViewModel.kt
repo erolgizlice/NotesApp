@@ -58,8 +58,8 @@ class NotesViewModel @Inject constructor(
     }
 
     sealed class NotesEvent {
-        data class DeleteNote(val note: Note): NotesEvent()
-        object RestoreNote: NotesEvent()
+        data class DeleteNote(val note: Note) : NotesEvent()
+        object RestoreNote : NotesEvent()
     }
 
     data class NotesState(

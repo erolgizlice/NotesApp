@@ -2,12 +2,12 @@ package com.erolgizlice.notesapp.feature.addeditnote
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.focus.FocusState
 import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.erolgizlice.notesapp.core.domain.NoteUseCases
+import com.erolgizlice.notesapp.core.model.data.AddEditNoteEvent
 import com.erolgizlice.notesapp.core.model.data.InvalidNoteException
 import com.erolgizlice.notesapp.core.model.data.Note
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,6 +21,10 @@ class AddEditNoteViewModel @Inject constructor(
     private val noteUseCases: NoteUseCases,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
+
+    private val _currentNote = mutableStateOf(Note())
+    val currentNote = _currentNote
+
     private val _noteTitle = mutableStateOf(
         NoteTextFieldState(
             hint = "Enter title..."
@@ -43,11 +47,14 @@ class AddEditNoteViewModel @Inject constructor(
 
     private var currentNoteId: Int? = null
 
+    private var recentlyDeletedNote: Note? = null
+
     init {
         savedStateHandle.get<Int>("noteId")?.let { noteId ->
             if (noteId != -1) {
                 viewModelScope.launch {
                     noteUseCases.getNoteUseCase(noteId)?.also { note ->
+                        currentNote.value = note
                         currentNoteId = note.id
                         _noteTitle.value = noteTitle.value.copy(
                             text = note.title,
@@ -117,21 +124,40 @@ class AddEditNoteViewModel @Inject constructor(
                     }
                 }
             }
+            is AddEditNoteEvent.DeleteNote -> {
+                viewModelScope.launch {
+                    noteUseCases.deleteNoteUseCase(event.note)
+                    recentlyDeletedNote = event.note
+                    _eventFlow.emit(UiEvent.DeleteNote)
+                }
+            }
+            is AddEditNoteEvent.RestoreNote -> {
+                viewModelScope.launch {
+                    noteUseCases.addNoteUseCase(recentlyDeletedNote ?: return@launch)
+                    recentlyDeletedNote = null
+                }
+            }
+            is AddEditNoteEvent.CopyNote -> {
+                viewModelScope.launch {
+                    noteUseCases.addNoteUseCase(
+                        Note(
+                            title = noteTitle.value.text,
+                            content = noteContent.value.text,
+                            timestamp = System.currentTimeMillis(),
+                            color = noteColor.value
+                        )
+                    )
+                    _eventFlow.emit(UiEvent.CopyNote)
+                }
+            }
         }
     }
 
     sealed class UiEvent {
         data class ShowSnackbar(val message: String) : UiEvent()
         object SaveNote : UiEvent()
-    }
-
-    sealed class AddEditNoteEvent {
-        data class EnteredTitle(val value: String) : AddEditNoteEvent()
-        data class ChangeTitleFocus(val focusState: FocusState) : AddEditNoteEvent()
-        data class EnteredContent(val value: String) : AddEditNoteEvent()
-        data class ChangeContentFocus(val focusState: FocusState) : AddEditNoteEvent()
-        data class ChangeColor(val color: Int) : AddEditNoteEvent()
-        object SaveNote : AddEditNoteEvent()
+        object DeleteNote : UiEvent()
+        object CopyNote : UiEvent()
     }
 
     data class NoteTextFieldState(

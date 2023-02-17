@@ -37,6 +37,10 @@ fun NavGraphBuilder.addEditNoteScreen(
             }
         )
     ) {
-        AddEditNoteRoute(onBackClick = onBackClick)
+        val color = it.arguments?.getInt("noteColor") ?: -1
+        AddEditNoteRoute(
+            onBackClick = onBackClick,
+            noteColor = color
+        )
     }
 }

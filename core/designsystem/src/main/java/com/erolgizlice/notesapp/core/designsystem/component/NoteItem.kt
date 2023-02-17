@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.erolgizlice.notesapp.core.designsystem.theme.WhiteContent
 
 @Composable
 fun NoteItem(
@@ -24,9 +25,15 @@ fun NoteItem(
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             if (title.isNotEmpty())
-                Text(text = title)
+                Text(
+                    text = title,
+                    color = WhiteContent
+                )
             if (content.isNotEmpty())
-                Text(text = content)
+                Text(
+                    text = content,
+                    color = WhiteContent
+                )
         }
     }
 }
