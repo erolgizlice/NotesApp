@@ -30,6 +30,7 @@ import com.erolgizlice.notesapp.core.model.data.AddEditNoteEvent
 import com.erolgizlice.notesapp.core.model.data.Note
 import com.erolgizlice.notesapp.core.ui.AlarmsBottomSheet
 import com.erolgizlice.notesapp.core.ui.ColorsBottomSheet
+import com.erolgizlice.notesapp.core.ui.PickDateDialog
 import com.erolgizlice.notesapp.core.ui.SettingsBottomSheet
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collectLatest
@@ -112,6 +113,7 @@ fun AddEditNoteScreen(
 ) {
     val context = LocalContext.current
     var bottomSheetDisplay by remember { mutableStateOf(BottomSheetDisplay.Settings) }
+    var shouldShowPickDateDialog by remember { mutableStateOf(false) }
 
     BackHandler(modalSheetState.isVisible) {
         coroutineScope.launch { modalSheetState.hide() }
@@ -198,7 +200,7 @@ fun AddEditNoteScreen(
                                 content = note.content
                             )
                         },
-                        onPickDateClick = {},
+                        onPickDateClick = { shouldShowPickDateDialog = true },
                         onPickPlaceClick = {}
                     )
                 }
@@ -282,6 +284,11 @@ fun AddEditNoteScreen(
                         modalSheetState.animateTo(ModalBottomSheetValue.Expanded)
                 }
             }
+        }
+        if (shouldShowPickDateDialog) {
+            PickDateDialog(
+                onDismiss = { shouldShowPickDateDialog = false }
+            )
         }
     }
 }
