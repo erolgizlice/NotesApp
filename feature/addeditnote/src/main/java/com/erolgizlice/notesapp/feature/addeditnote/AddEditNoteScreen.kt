@@ -21,15 +21,20 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.erolgizlice.notesapp.core.data.util.getDateTime
+import com.erolgizlice.notesapp.core.data.util.setAlarm
 import com.erolgizlice.notesapp.core.designsystem.component.*
 import com.erolgizlice.notesapp.core.designsystem.theme.LightGrey
 import com.erolgizlice.notesapp.core.designsystem.theme.Typography
 import com.erolgizlice.notesapp.core.designsystem.theme.WhiteContent
 import com.erolgizlice.notesapp.core.model.data.AddEditNoteEvent
 import com.erolgizlice.notesapp.core.model.data.Note
+import com.erolgizlice.notesapp.core.ui.AlarmsBottomSheet
+import com.erolgizlice.notesapp.core.ui.ColorsBottomSheet
+import com.erolgizlice.notesapp.core.ui.SettingsBottomSheet
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import java.util.*
 
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -106,7 +111,7 @@ fun AddEditNoteScreen(
     isPinned: Boolean
 ) {
     val context = LocalContext.current
-    val isColor = remember { mutableStateOf(false) }
+    var bottomSheetDisplay by remember { mutableStateOf(BottomSheetDisplay.Settings) }
 
     BackHandler(modalSheetState.isVisible) {
         coroutineScope.launch { modalSheetState.hide() }
@@ -116,50 +121,87 @@ fun AddEditNoteScreen(
         sheetState = modalSheetState,
         sheetShape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp),
         sheetContent = {
-            if (isColor.value) {
-                ColorsBottomSheet(
-                    colorList = Note.noteColors,
-                    selectedColor = color.value,
-                    onColorClick = {
-                        scope.launch {
-                            color.animateTo(
-                                targetValue = Color(it),
-                                animationSpec = tween(
-                                    durationMillis = 500
+            when (bottomSheetDisplay) {
+                BottomSheetDisplay.Colors -> {
+                    ColorsBottomSheet(
+                        colorList = Note.noteColors,
+                        selectedColor = color.value,
+                        onColorClick = {
+                            scope.launch {
+                                color.animateTo(
+                                    targetValue = Color(it),
+                                    animationSpec = tween(
+                                        durationMillis = 500
+                                    )
                                 )
+                            }
+                            onEvent(AddEditNoteEvent.ChangeColor(it))
+                        }
+                    )
+                }
+                BottomSheetDisplay.Settings -> {
+                    SettingsBottomSheet(
+                        color = color.value,
+                        coroutineScope = coroutineScope,
+                        modalSheetState = modalSheetState,
+                        onDeleteClick = {
+                            onEvent(AddEditNoteEvent.DeleteNote(note))
+                        },
+                        onCopyClick = {
+                            onEvent(AddEditNoteEvent.CopyNote)
+                        },
+                        onShareClick = {
+                            val sendIntent: Intent = Intent().apply {
+                                action = Intent.ACTION_SEND
+                                putExtra(Intent.EXTRA_TEXT, "${note.title}\n${note.content}")
+                                type = "text/plain"
+                            }
+                            val shareIntent = Intent.createChooser(sendIntent, null)
+                            context.startActivity(shareIntent)
+                        },
+                        onHelpClick = {
+                            val intent = Intent(Intent.ACTION_VIEW)
+                            val data: Uri =
+                                Uri.parse("mailto:?subject=${note.title}&body=${note.content}&to=erolgizlice@gmail.com")
+                            intent.data = data
+                            context.startActivity(intent)
+                        }
+                    )
+                }
+                BottomSheetDisplay.Alarms -> {
+                    AlarmsBottomSheet(
+                        color = color.value,
+                        coroutineScope = coroutineScope,
+                        modalSheetState = modalSheetState,
+                        onLaterTodayClick = {
+                            setAlarm(
+                                context = context,
+                                calendar = Calendar.getInstance().apply {
+                                    timeInMillis = System.currentTimeMillis()
+                                set(Calendar.HOUR_OF_DAY, 18)
+                                set(Calendar.MINUTE, 0)
+                                },
+                                title = note.title,
+                                content = note.content
                             )
-                        }
-                        onEvent(AddEditNoteEvent.ChangeColor(it))
-                    }
-                )
-            } else {
-                SettingsBottomSheet(
-                    color = color.value,
-                    coroutineScope = coroutineScope,
-                    modalSheetState = modalSheetState,
-                    onDeleteClick = {
-                        onEvent(AddEditNoteEvent.DeleteNote(note))
-                    },
-                    onCopyClick = {
-                        onEvent(AddEditNoteEvent.CopyNote)
-                    },
-                    onShareClick = {
-                        val sendIntent: Intent = Intent().apply {
-                            action = Intent.ACTION_SEND
-                            putExtra(Intent.EXTRA_TEXT, "${note.title}\n${note.content}")
-                            type = "text/plain"
-                        }
-                        val shareIntent = Intent.createChooser(sendIntent, null)
-                        context.startActivity(shareIntent)
-                    },
-                    onHelpClick = {
-                        val intent = Intent(Intent.ACTION_VIEW)
-                        val data: Uri =
-                            Uri.parse("mailto:?subject=${note.title}&body=${note.content}&to=erolgizlice@gmail.com")
-                        intent.data = data
-                        context.startActivity(intent)
-                    }
-                )
+                        },
+                        onTomorrowMorningClick = {
+                            setAlarm(
+                                context = context,
+                                calendar = Calendar.getInstance().apply {
+                                    timeInMillis = System.currentTimeMillis()
+                                    add(Calendar.DATE, 1)
+                                    set(Calendar.HOUR_OF_DAY, 8)
+                                    set(Calendar.MINUTE, 0)
+                                },
+                                title = note.title,
+                                content = note.content
+                            )
+                        },
+                        onPickDateClick = {},
+                        onPickPlaceClick = {}
+                    )
+                }
             }
         }
     ) {
@@ -169,7 +211,16 @@ fun AddEditNoteScreen(
             AddEditNoteTopAppBar(
                 isPinned = isPinned,
                 onBackClick = { onEvent(AddEditNoteEvent.SaveNote) },
-                onPinClick = { onEvent(AddEditNoteEvent.PinNote) }
+                onPinClick = { onEvent(AddEditNoteEvent.PinNote) },
+                onAlarmClick = {
+                    coroutineScope.launch {
+                        bottomSheetDisplay = BottomSheetDisplay.Alarms
+                        if (modalSheetState.isVisible)
+                            modalSheetState.hide()
+                        else
+                            modalSheetState.animateTo(ModalBottomSheetValue.Expanded)
+                    }
+                }
             )
             Box(
                 Modifier.padding(horizontal = 16.dp, vertical = 24.dp)
@@ -212,11 +263,29 @@ fun AddEditNoteScreen(
                 )
             }
             AddEditNoteBottomBar(
-                coroutineScope = coroutineScope,
-                modalSheetState = modalSheetState,
-                date = getDateTime(note.timestamp),
-                isColor = isColor
-            )
+                date = getDateTime(note.timestamp, "dd/MM/yyyy"),
+                onColorClick = {
+                    coroutineScope.launch {
+                        bottomSheetDisplay = BottomSheetDisplay.Colors
+                        if (modalSheetState.isVisible)
+                            modalSheetState.hide()
+                        else
+                            modalSheetState.animateTo(ModalBottomSheetValue.Expanded)
+                    }
+                }
+            ) {
+                coroutineScope.launch {
+                    bottomSheetDisplay = BottomSheetDisplay.Settings
+                    if (modalSheetState.isVisible)
+                        modalSheetState.hide()
+                    else
+                        modalSheetState.animateTo(ModalBottomSheetValue.Expanded)
+                }
+            }
         }
     }
+}
+
+enum class BottomSheetDisplay {
+    Colors, Settings, Alarms
 }

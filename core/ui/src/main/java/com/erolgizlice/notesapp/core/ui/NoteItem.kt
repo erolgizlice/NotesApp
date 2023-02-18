@@ -1,4 +1,4 @@
-package com.erolgizlice.notesapp.core.designsystem.component
+package com.erolgizlice.notesapp.core.ui
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding

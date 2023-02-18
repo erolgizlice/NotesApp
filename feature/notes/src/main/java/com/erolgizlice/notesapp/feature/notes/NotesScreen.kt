@@ -23,11 +23,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.erolgizlice.notesapp.core.designsystem.component.NoteItem
 import com.erolgizlice.notesapp.core.designsystem.component.TextFieldHint
 import com.erolgizlice.notesapp.core.designsystem.theme.SearchColor
 import com.erolgizlice.notesapp.core.designsystem.theme.WhiteContent
 import com.erolgizlice.notesapp.core.model.data.Note
+import com.erolgizlice.notesapp.core.ui.NoteItem
 import com.erolgizlice.notesapp.notes.R
 
 @Composable

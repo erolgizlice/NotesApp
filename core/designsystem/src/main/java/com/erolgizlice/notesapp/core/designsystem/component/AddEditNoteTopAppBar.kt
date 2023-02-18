@@ -20,6 +20,7 @@ fun AddEditNoteTopAppBar(
     isPinned: Boolean,
     onBackClick: () -> Unit,
     onPinClick: () -> Unit,
+    onAlarmClick: () -> Unit
 ) {
     Row {
         IconButton(onClick = onBackClick) {
@@ -43,7 +44,7 @@ fun AddEditNoteTopAppBar(
                     contentDescription = null
                 )
             }
-            IconButton(onClick = { /*TODO*/ }) {
+            IconButton(onClick = onAlarmClick) {
                 Icon(
                     imageVector = Icons.Outlined.AddAlert,
                     tint = WhiteContent,

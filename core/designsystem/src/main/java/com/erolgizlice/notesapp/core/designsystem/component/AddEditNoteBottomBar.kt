@@ -6,20 +6,16 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.erolgizlice.notesapp.core.designsystem.theme.WhiteContent
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun AddEditNoteBottomBar(
-    coroutineScope: CoroutineScope,
-    modalSheetState: ModalBottomSheetState,
     date: String?,
-    isColor: MutableState<Boolean>
+    onColorClick: () -> Unit,
+    onSettingsClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -28,15 +24,7 @@ fun AddEditNoteBottomBar(
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         IconButton(
-            onClick = {
-                coroutineScope.launch {
-                    isColor.value = true
-                    if (modalSheetState.isVisible)
-                        modalSheetState.hide()
-                    else
-                        modalSheetState.animateTo(ModalBottomSheetValue.Expanded)
-                }
-            }) {
+            onClick = onColorClick) {
             Icon(
                 imageVector = Icons.Outlined.Palette,
                 tint = WhiteContent,
@@ -51,15 +39,7 @@ fun AddEditNoteBottomBar(
             )
         }
         IconButton(
-            onClick = {
-                coroutineScope.launch {
-                    isColor.value = false
-                    if (modalSheetState.isVisible)
-                        modalSheetState.hide()
-                    else
-                        modalSheetState.animateTo(ModalBottomSheetValue.Expanded)
-                }
-            }
+            onClick = onSettingsClick
         ) {
             Icon(
                 imageVector = Icons.Outlined.MoreVert,

@@ -1,4 +1,4 @@
-package com.erolgizlice.notesapp.core.designsystem.component
+package com.erolgizlice.notesapp.core.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
