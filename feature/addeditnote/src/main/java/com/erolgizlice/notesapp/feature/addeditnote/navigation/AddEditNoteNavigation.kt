@@ -9,10 +9,11 @@ const val addEditNoteNavigationRoute = "add_edit_note_route"
 fun NavController.navigateToAddEditNote(
     navOptions: NavOptions? = null,
     noteId: Int = -1,
-    noteColor: Int = -1
+    noteColor: Int = -1,
+    isTodoNote: Boolean = false
 ) {
     this.navigate(
-        "$addEditNoteNavigationRoute?noteId=$noteId&noteColor=$noteColor",
+        "$addEditNoteNavigationRoute?noteId=$noteId&noteColor=$noteColor&isTodoNote=$isTodoNote",
         navOptions
     )
 }
@@ -21,7 +22,7 @@ fun NavGraphBuilder.addEditNoteScreen(
     onBackClick: () -> Unit
 ) {
     composable(
-        route = "$addEditNoteNavigationRoute?noteId={noteId}&noteColor={noteColor}",
+        route = "$addEditNoteNavigationRoute?noteId={noteId}&noteColor={noteColor}&isTodoNote={isTodoNote}",
         arguments = listOf(
             navArgument(
                 name = "noteId"
@@ -34,13 +35,21 @@ fun NavGraphBuilder.addEditNoteScreen(
             ) {
                 type = NavType.IntType
                 defaultValue = -1
+            },
+            navArgument(
+                name = "isTodoNote"
+            ) {
+                type = NavType.BoolType
+                defaultValue = false
             }
         )
     ) {
         val color = it.arguments?.getInt("noteColor") ?: -1
+        val isTodoNote = it.arguments?.getBoolean("isTodoNote") ?: false
         AddEditNoteRoute(
             onBackClick = onBackClick,
-            noteColor = color
+            noteColor = color,
+            isTodoNote = isTodoNote
         )
     }
 }

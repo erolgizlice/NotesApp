@@ -28,12 +28,13 @@ import com.erolgizlice.notesapp.core.designsystem.theme.SearchColor
 import com.erolgizlice.notesapp.core.designsystem.theme.WhiteContent
 import com.erolgizlice.notesapp.core.model.data.Note
 import com.erolgizlice.notesapp.core.ui.NoteItem
+import com.erolgizlice.notesapp.core.ui.TodoNoteItem
 import com.erolgizlice.notesapp.notes.R
 
 @Composable
 internal fun NotesRoute(
     modifier: Modifier = Modifier,
-    onNoteClick: (Int, Int) -> Unit,
+    onNoteClick: (Int, Int, Boolean) -> Unit,
     viewModel: NotesViewModel = hiltViewModel(),
     searchState: SearchState = rememberSearchState()
 ) {
@@ -53,7 +54,7 @@ fun NotesScreen(
     modifier: Modifier,
     notesState: NotesViewModel.NotesState,
     searchState: SearchState,
-    onNoteClick: (Int, Int) -> Unit
+    onNoteClick: (Int, Int, Boolean) -> Unit
 ) {
     val focusManager = LocalFocusManager.current
 
@@ -146,7 +147,7 @@ fun NotesScreen(
 fun ShowResults(
     modifier: Modifier,
     resultList: List<Note>,
-    onNoteClick: (Int, Int) -> Unit
+    onNoteClick: (Int, Int, Boolean) -> Unit
 ) {
     LazyVerticalGrid(
         modifier = Modifier
@@ -155,16 +156,29 @@ fun ShowResults(
         contentPadding = PaddingValues(4.dp)
     ) {
         items(resultList) { note ->
-            NoteItem(
-                modifier = modifier
-                    .padding(4.dp)
-                    .clickable {
-                        note.id?.let { onNoteClick(it, note.color) }
-                    },
-                title = note.title,
-                content = note.content,
-                color = note.color
-            )
+            if (note.todoContent.isEmpty() || note.todoContent.any { it.content.isEmpty() }) {
+                NoteItem(
+                    modifier = modifier
+                        .padding(4.dp)
+                        .clickable {
+                            note.id?.let { onNoteClick(it, note.color, false) }
+                        },
+                    title = note.title,
+                    content = note.content,
+                    color = note.color
+                )
+            } else {
+                TodoNoteItem(
+                    modifier = modifier
+                        .padding(4.dp)
+                        .clickable {
+                            note.id?.let { onNoteClick(it, note.color, true) }
+                        },
+                    title = note.title,
+                    contentList = note.todoContent,
+                    color = note.color
+                )
+            }
         }
     }
 }

@@ -1,7 +1,9 @@
 package com.erolgizlice.notesapp.feature.addeditnote
 
 import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -10,6 +12,7 @@ import com.erolgizlice.notesapp.core.domain.NoteUseCases
 import com.erolgizlice.notesapp.core.model.data.AddEditNoteEvent
 import com.erolgizlice.notesapp.core.model.data.InvalidNoteException
 import com.erolgizlice.notesapp.core.model.data.Note
+import com.erolgizlice.notesapp.core.model.data.TodoNote
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -25,19 +28,14 @@ class AddEditNoteViewModel @Inject constructor(
     private val _currentNote = mutableStateOf(Note())
     val currentNote = _currentNote
 
-    private val _noteTitle = mutableStateOf(
-        NoteTextFieldState(
-            hint = "Enter title..."
-        )
-    )
-    val noteTitle: State<NoteTextFieldState> = _noteTitle
+    private val _noteTitle = mutableStateOf("")
+    val noteTitle: State<String> = _noteTitle
 
-    private val _noteContent = mutableStateOf(
-        NoteTextFieldState(
-            hint = "Enter some content"
-        )
-    )
-    val noteContent: State<NoteTextFieldState> = _noteContent
+    private val _noteContent = mutableStateOf("")
+    val noteContent: State<String> = _noteContent
+
+    private val _todoNoteContent = mutableStateListOf(TodoNote())
+    val todoNoteContent: SnapshotStateList<TodoNote> = _todoNoteContent
 
     private val _noteColor = mutableStateOf(Note.noteColors.random().toArgb())
     val noteColor: State<Int> = _noteColor
@@ -59,14 +57,10 @@ class AddEditNoteViewModel @Inject constructor(
                     noteUseCases.getNoteUseCase(noteId)?.also { note ->
                         currentNote.value = note
                         currentNoteId = note.id
-                        _noteTitle.value = noteTitle.value.copy(
-                            text = note.title,
-                            isHintVisible = false
-                        )
-                        _noteContent.value = _noteContent.value.copy(
-                            text = note.content,
-                            isHintVisible = false
-                        )
+                        _noteTitle.value = note.title
+                        _noteContent.value = note.content
+                        _todoNoteContent.clear()
+                        _todoNoteContent.addAll(note.todoContent)
                         _noteColor.value = note.color
                         _notePinned.value = note.isPinned
                     }
@@ -78,25 +72,19 @@ class AddEditNoteViewModel @Inject constructor(
     fun onEvent(event: AddEditNoteEvent) {
         when (event) {
             is AddEditNoteEvent.EnteredTitle -> {
-                _noteTitle.value = noteTitle.value.copy(
-                    text = event.value
-                )
-            }
-            is AddEditNoteEvent.ChangeTitleFocus -> {
-                _noteTitle.value = noteTitle.value.copy(
-                    isHintVisible = !event.focusState.isFocused &&
-                            noteTitle.value.text.isBlank()
-                )
+                _noteTitle.value = event.value
             }
             is AddEditNoteEvent.EnteredContent -> {
-                _noteContent.value = _noteContent.value.copy(
-                    text = event.value
+                _noteContent.value = event.value
+            }
+            is AddEditNoteEvent.EnteredTodoContent -> {
+                _todoNoteContent[event.index] = todoNoteContent[event.index].copy(
+                    content = event.value
                 )
             }
-            is AddEditNoteEvent.ChangeContentFocus -> {
-                _noteContent.value = _noteContent.value.copy(
-                    isHintVisible = !event.focusState.isFocused &&
-                            _noteContent.value.text.isBlank()
+            is AddEditNoteEvent.ChangeCheckBox -> {
+                _todoNoteContent[event.index] = todoNoteContent[event.index].copy(
+                    isChecked = event.isChecked
                 )
             }
             is AddEditNoteEvent.ChangeColor -> {
@@ -105,13 +93,15 @@ class AddEditNoteViewModel @Inject constructor(
             is AddEditNoteEvent.SaveNote -> {
                 viewModelScope.launch {
                     try {
-                        if ((noteTitle.value.text.isNotEmpty() && noteTitle.value.text.isNotBlank()) ||
-                            (noteContent.value.text.isNotEmpty() && noteContent.value.text.isNotBlank())
+                        if ((noteTitle.value.isNotEmpty() && noteTitle.value.isNotBlank()) ||
+                            (noteContent.value.isNotEmpty() && noteContent.value.isNotBlank() ||
+                                    (todoNoteContent.isNotEmpty() && todoNoteContent.any { it.content.isNotEmpty() }))
                         ) {
                             noteUseCases.addNoteUseCase(
                                 Note(
-                                    title = noteTitle.value.text,
-                                    content = noteContent.value.text,
+                                    title = noteTitle.value,
+                                    content = noteContent.value,
+                                    todoContent = todoNoteContent,
                                     timestamp = System.currentTimeMillis(),
                                     color = noteColor.value,
                                     id = currentNoteId,
@@ -146,8 +136,9 @@ class AddEditNoteViewModel @Inject constructor(
                 viewModelScope.launch {
                     noteUseCases.addNoteUseCase(
                         Note(
-                            title = noteTitle.value.text,
-                            content = noteContent.value.text,
+                            title = noteTitle.value,
+                            content = noteContent.value,
+                            todoContent = todoNoteContent,
                             timestamp = System.currentTimeMillis(),
                             color = noteColor.value,
                             isPinned = notePinned.value
@@ -169,9 +160,8 @@ class AddEditNoteViewModel @Inject constructor(
         object CopyNote : UiEvent()
     }
 
-    data class NoteTextFieldState(
-        val text: String = "",
-        val hint: String = "",
-        val isHintVisible: Boolean = true
+    data class TodoNoteTextFieldState(
+        var text: String = "",
+        var isChecked: Boolean = false
     )
 }

@@ -3,6 +3,7 @@ plugins {
     id 'org.jetbrains.kotlin.android'
     id 'kotlin-kapt'
     id("com.google.dagger.hilt.android")
+    id 'org.jetbrains.kotlin.plugin.serialization' version '1.6.10'
 }
 
 android {
@@ -43,6 +44,7 @@ dependencies {
     kapt "androidx.room:room-compiler:2.5.0"
     kapt("com.google.dagger:hilt-android-compiler:2.44.2")
     implementation 'androidx.hilt:hilt-common:1.0.0'
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
 
     implementation project(path: ':core:model')
 

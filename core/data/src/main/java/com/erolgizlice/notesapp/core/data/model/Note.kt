@@ -8,6 +8,7 @@ fun Note.asEntityModel() = NoteEntity(
     id = id,
     title = title,
     content = content,
+    todoContent = todoContent.map { it.asEntityModel() },
     color = color,
     timestamp = timestamp,
     isPinned = isPinned

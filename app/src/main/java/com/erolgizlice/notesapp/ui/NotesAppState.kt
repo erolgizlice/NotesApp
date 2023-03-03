@@ -11,8 +11,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
 import androidx.tracing.trace
 import com.erolgizlice.notesapp.core.data.util.NetworkMonitor
+import com.erolgizlice.notesapp.feature.addeditnote.navigation.navigateToAddEditNote
 import com.erolgizlice.notesapp.feature.notes.navigation.notesNavigationRoute
-import com.erolgizlice.notesapp.feature.todo.navigation.navigateToTODO
 import com.erolgizlice.notesapp.navigation.NotesTabs
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
@@ -69,9 +69,18 @@ class NotesAppState(
             }
 
             when (notesDestination) {
-                NotesTabs.TODO -> navController.navigateToTODO(topLevelNavOptions)
-                NotesTabs.MIC -> navController.navigateToTODO(topLevelNavOptions)
-                NotesTabs.GALLERY -> navController.navigateToTODO(topLevelNavOptions)
+                NotesTabs.TODO -> navController.navigateToAddEditNote(
+                    navOptions = topLevelNavOptions,
+                    isTodoNote = true
+                )
+                NotesTabs.MIC -> navController.navigateToAddEditNote(
+                    navOptions = topLevelNavOptions,
+                    isTodoNote = true
+                )
+                NotesTabs.GALLERY -> navController.navigateToAddEditNote(
+                    navOptions = topLevelNavOptions,
+                    isTodoNote = true
+                )
             }
         }
     }

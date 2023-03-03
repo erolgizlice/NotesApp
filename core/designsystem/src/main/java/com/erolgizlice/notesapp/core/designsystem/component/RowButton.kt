@@ -19,14 +19,14 @@ fun RowButton(
     text: String,
     endText: String? = null,
     icon: ImageVector,
-    coroutineScope: CoroutineScope,
-    modalSheetState: ModalBottomSheetState
+    coroutineScope: CoroutineScope? = null,
+    modalSheetState: ModalBottomSheetState? = null
 ) {
     Button(
         modifier = Modifier.fillMaxWidth(),
         onClick = {
             onClick()
-            coroutineScope.launch { modalSheetState.hide() }
+            coroutineScope?.launch { modalSheetState?.hide() }
         },
         colors = ButtonDefaults.buttonColors(backgroundColor = Color.Transparent),
         elevation = ButtonDefaults.elevation(0.dp)

@@ -9,10 +9,16 @@ import androidx.compose.animation.core.AnimationVector4D
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Add
 import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
@@ -28,6 +34,7 @@ import com.erolgizlice.notesapp.core.designsystem.theme.Typography
 import com.erolgizlice.notesapp.core.designsystem.theme.WhiteContent
 import com.erolgizlice.notesapp.core.model.data.AddEditNoteEvent
 import com.erolgizlice.notesapp.core.model.data.Note
+import com.erolgizlice.notesapp.core.model.data.TodoNote
 import com.erolgizlice.notesapp.core.ui.AlarmsBottomSheet
 import com.erolgizlice.notesapp.core.ui.ColorsBottomSheet
 import com.erolgizlice.notesapp.core.ui.SettingsBottomSheet
@@ -43,10 +50,12 @@ fun AddEditNoteRoute(
     modifier: Modifier = Modifier,
     onBackClick: () -> Unit,
     viewModel: AddEditNoteViewModel = hiltViewModel(),
-    noteColor: Int
+    noteColor: Int,
+    isTodoNote: Boolean
 ) {
     val titleState = viewModel.noteTitle.value
     val contentState = viewModel.noteContent.value
+    val todoContentState = remember { viewModel.todoNoteContent }
     val isPinned by viewModel.notePinned
 
     val scaffoldState = rememberScaffoldState()
@@ -92,23 +101,27 @@ fun AddEditNoteRoute(
         color = noteBackgroundAnimatable,
         scope = scope,
         note = viewModel.currentNote.value,
-        isPinned = isPinned
+        isPinned = isPinned,
+        isTodoNote = isTodoNote,
+        todoContentState = todoContentState
     )
 }
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalComposeUiApi::class)
 @Composable
 fun AddEditNoteScreen(
     modifier: Modifier,
-    titleState: AddEditNoteViewModel.NoteTextFieldState,
-    contentState: AddEditNoteViewModel.NoteTextFieldState,
+    titleState: String,
+    contentState: String,
     onEvent: (AddEditNoteEvent) -> Unit,
     coroutineScope: CoroutineScope,
     modalSheetState: ModalBottomSheetState,
     color: Animatable<Color, AnimationVector4D>,
     note: Note,
     scope: CoroutineScope,
-    isPinned: Boolean
+    isPinned: Boolean,
+    isTodoNote: Boolean,
+    todoContentState: SnapshotStateList<TodoNote>,
 ) {
     val context = LocalContext.current
     var bottomSheetDisplay by remember { mutableStateOf(BottomSheetDisplay.Settings) }
@@ -178,8 +191,8 @@ fun AddEditNoteScreen(
                                 context = context,
                                 calendar = Calendar.getInstance().apply {
                                     timeInMillis = System.currentTimeMillis()
-                                set(Calendar.HOUR_OF_DAY, 18)
-                                set(Calendar.MINUTE, 0)
+                                    set(Calendar.HOUR_OF_DAY, 18)
+                                    set(Calendar.MINUTE, 0)
                                 },
                                 title = note.title,
                                 content = note.content
@@ -225,14 +238,14 @@ fun AddEditNoteScreen(
             Box(
                 Modifier.padding(horizontal = 16.dp, vertical = 24.dp)
             ) {
-                if (titleState.text.isEmpty()) {
+                if (titleState.isEmpty()) {
                     TextFieldHint(
                         placeholder = stringResource(id = R.string.placeholder_title),
                         textStyle = Typography.titleLarge.copy(color = LightGrey),
                     )
                 }
                 BasicTextField(
-                    value = titleState.text,
+                    value = titleState,
                     onValueChange = {
                         onEvent(AddEditNoteEvent.EnteredTitle(it))
                     },
@@ -240,26 +253,48 @@ fun AddEditNoteScreen(
                     textStyle = Typography.titleLarge.copy(color = WhiteContent)
                 )
             }
-            Box(
-                Modifier
-                    .weight(1f)
-                    .wrapContentHeight()
-                    .padding(horizontal = 16.dp)
-            ) {
-                if (contentState.text.isEmpty()) {
-                    TextFieldHint(
-                        placeholder = stringResource(id = R.string.placeholder_note),
-                        textStyle = Typography.bodyLarge.copy(color = LightGrey),
-                    )
+            if (isTodoNote) {
+                LazyColumn(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                ) {
+                    itemsIndexed(todoContentState) { index, todoNote: TodoNote ->
+                        TodoTextField(
+                            text = todoNote.content,
+                            isChecked = todoNote.isChecked,
+                            onEventEnteredContent = {
+                                onEvent(AddEditNoteEvent.EnteredTodoContent(index, it))
+                            },
+                            onEventChecked = {
+                                onEvent(AddEditNoteEvent.ChangeCheckBox(index, it))
+                            },
+                            onDeleteClicked = {
+                                todoContentState.remove(todoNote)
+                            },
+                            onAddClicked = {
+                                todoContentState.add(TodoNote())
+                            }
+                        )
+                    }
+
+                    item {
+                        RowButton(
+                            onClick = { todoContentState.add(TodoNote()) },
+                            text = stringResource(id = R.string.label_list_item),
+                            icon = Icons.Outlined.Add
+                        )
+                    }
                 }
-                BasicTextField(
-                    modifier = Modifier.fillMaxSize(),
-                    value = contentState.text,
-                    onValueChange = {
-                        onEvent(AddEditNoteEvent.EnteredContent(it))
-                    },
-                    cursorBrush = SolidColor(WhiteContent),
-                    textStyle = Typography.bodyLarge.copy(color = WhiteContent)
+            } else {
+                NoteTextField(
+                    modifier = Modifier
+                        .weight(1f)
+                        .wrapContentHeight()
+                        .padding(horizontal = 16.dp),
+                    onEventEnteredContent = { onEvent(AddEditNoteEvent.EnteredContent(it)) },
+                    text = contentState,
+                    placeHolder = stringResource(id = R.string.placeholder_note)
                 )
             }
             AddEditNoteBottomBar(

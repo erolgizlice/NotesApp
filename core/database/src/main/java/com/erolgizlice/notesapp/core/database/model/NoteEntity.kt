@@ -10,6 +10,7 @@ data class NoteEntity(
     val id: Int? = null,
     val title: String,
     val content: String,
+    val todoContent: List<TodoNoteEntity> = emptyList(),
     val color: Int,
     val timestamp: Long? = null,
     val isPinned: Boolean = false
@@ -19,6 +20,7 @@ fun NoteEntity.asExternalModel() = Note(
     id = id,
     title = title,
     content = content,
+    todoContent = todoContent.map { it.asExternalModel() },
     color = color,
     timestamp = timestamp,
     isPinned = isPinned

@@ -6,7 +6,7 @@ import androidx.compose.material.icons.outlined.CheckBox
 import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material.icons.outlined.Mic
 import androidx.compose.ui.graphics.vector.ImageVector
-import com.erolgizlice.notesapp.feature.todo.R as todoR
+import com.erolgizlice.notesapp.R
 
 enum class NotesTabs(
     val icon: ImageVector,
@@ -15,17 +15,17 @@ enum class NotesTabs(
 ) {
     TODO(
         icon = Icons.Outlined.CheckBox,
-        title = todoR.string.todo,
+        title = R.string.todo,
         route = NotesDestinations.TODO_ROUTE
     ),
     MIC(
         icon = Icons.Outlined.Mic,
-        title = todoR.string.todo,
+        title = R.string.mic,
         route = NotesDestinations.MIC_ROUTE
     ),
     GALLERY(
         icon = Icons.Outlined.Image,
-        title = todoR.string.todo,
+        title = R.string.gallery,
         route = NotesDestinations.GALLERY_ROUTE
     )
 }

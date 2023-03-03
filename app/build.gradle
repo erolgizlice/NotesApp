@@ -71,7 +71,6 @@ dependencies {
 
     implementation project(path: ':core:data')
     implementation project(path: ':core:designsystem')
-    implementation project(path: ':feature:todo')
     implementation project(path: ':feature:notes')
     implementation project(path: ':feature:addeditnote')
 

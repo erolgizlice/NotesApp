@@ -8,7 +8,6 @@ import com.erolgizlice.notesapp.feature.addeditnote.navigation.addEditNoteScreen
 import com.erolgizlice.notesapp.feature.addeditnote.navigation.navigateToAddEditNote
 import com.erolgizlice.notesapp.feature.notes.navigation.notesNavigationRoute
 import com.erolgizlice.notesapp.feature.notes.navigation.notesScreen
-import com.erolgizlice.notesapp.feature.todo.navigation.todoScreen
 
 @Composable
 fun NotesNavHost(
@@ -23,14 +22,14 @@ fun NotesNavHost(
         modifier = modifier
     ) {
         notesScreen(
-            onNoteClick = { noteId, noteColor ->
+            onNoteClick = { noteId, noteColor, isTodoNote ->
                 navController.navigateToAddEditNote(
                     noteId = noteId,
-                    noteColor = noteColor
+                    noteColor = noteColor,
+                    isTodoNote = isTodoNote
                 )
             }
         )
-        todoScreen()
         addEditNoteScreen(
             onBackClick = navController::popBackStack
         )

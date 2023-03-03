@@ -6,6 +6,7 @@ data class Note(
     val id: Int? = null,
     val title: String = "",
     val content: String = "",
+    val todoContent: List<TodoNote> = emptyList(),
     val color: Int = -1,
     val timestamp: Long? = null,
     val isPinned: Boolean = false
