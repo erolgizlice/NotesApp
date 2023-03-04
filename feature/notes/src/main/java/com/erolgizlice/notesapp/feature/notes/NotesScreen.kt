@@ -9,10 +9,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.AccountCircle
-import androidx.compose.material.icons.outlined.ArrowBack
-import androidx.compose.material.icons.outlined.Menu
-import androidx.compose.material.icons.outlined.ViewAgenda
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,13 +36,16 @@ internal fun NotesRoute(
     searchState: SearchState = rememberSearchState()
 ) {
     val notesState by viewModel.state
+    val isGrid by viewModel.isGrid
 
     NotesScreen(
         modifier = modifier
             .fillMaxSize(),
         notesState = notesState,
         searchState = searchState.apply { searchResults = notesState.notes },
-        onNoteClick = onNoteClick
+        onNoteClick = onNoteClick,
+        isGrid = isGrid,
+        onGridClicked = { viewModel.onEvent(NotesViewModel.NotesEvent.GridClicked) }
     )
 }
 
@@ -54,7 +54,9 @@ fun NotesScreen(
     modifier: Modifier,
     notesState: NotesViewModel.NotesState,
     searchState: SearchState,
-    onNoteClick: (Int, Int, Boolean) -> Unit
+    onNoteClick: (Int, Int, Boolean) -> Unit,
+    isGrid: Boolean,
+    onGridClicked: () -> Unit
 ) {
     val focusManager = LocalFocusManager.current
 
@@ -68,6 +70,8 @@ fun NotesScreen(
             onQueryChange = { searchState.query = it },
             searchFocused = searchState.focused,
             onSearchFocusChange = { searchState.focused = it },
+            isGrid = isGrid,
+            onGridClicked = onGridClicked,
             onClearQuery = {
                 focusManager.clearFocus()
                 searchState.query = TextFieldValue("")
@@ -105,7 +109,8 @@ fun NotesScreen(
                     ShowResults(
                         modifier = modifier,
                         resultList = searchState.searchResults.filter { it.isPinned },
-                        onNoteClick = onNoteClick
+                        onNoteClick = onNoteClick,
+                        isGrid = isGrid
                     )
                     if (searchState.searchResults.filterNot { it.isPinned }.isNotEmpty()) {
                         Text(
@@ -116,14 +121,16 @@ fun NotesScreen(
                         ShowResults(
                             modifier = modifier,
                             resultList = searchState.searchResults.filterNot { it.isPinned },
-                            onNoteClick = onNoteClick
+                            onNoteClick = onNoteClick,
+                            isGrid = isGrid
                         )
                     }
                 } else {
                     ShowResults(
                         modifier = modifier,
                         resultList = searchState.searchResults,
-                        onNoteClick = onNoteClick
+                        onNoteClick = onNoteClick,
+                        isGrid = isGrid
                     )
                 }
             }
@@ -147,12 +154,13 @@ fun NotesScreen(
 fun ShowResults(
     modifier: Modifier,
     resultList: List<Note>,
-    onNoteClick: (Int, Int, Boolean) -> Unit
+    onNoteClick: (Int, Int, Boolean) -> Unit,
+    isGrid: Boolean
 ) {
     LazyVerticalGrid(
         modifier = Modifier
             .padding(4.dp),
-        columns = GridCells.Fixed(2),
+        columns = GridCells.Fixed(if (isGrid) 2 else 1),
         contentPadding = PaddingValues(4.dp)
     ) {
         items(resultList) { note ->
@@ -190,6 +198,8 @@ private fun SearchBar(
     searchFocused: Boolean,
     onSearchFocusChange: (Boolean) -> Unit,
     onClearQuery: () -> Unit,
+    isGrid: Boolean,
+    onGridClicked: () -> Unit,
     searching: Boolean,
     modifier: Modifier = Modifier
 ) {
@@ -248,9 +258,10 @@ private fun SearchBar(
                 )
                 if (!searchFocused) {
                     Row {
-                        IconButton(onClick = {/*TODO*/ }) {
+                        IconButton(onClick = onGridClicked) {
                             Icon(
-                                imageVector = Icons.Outlined.ViewAgenda,
+                                imageVector = if (isGrid) Icons.Outlined.ViewAgenda
+                                else Icons.Outlined.GridView,
                                 tint = WhiteContent,
                                 contentDescription = null
                             )

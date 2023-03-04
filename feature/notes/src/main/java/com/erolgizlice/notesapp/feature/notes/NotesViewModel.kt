@@ -21,6 +21,9 @@ class NotesViewModel @Inject constructor(
     private val _state = mutableStateOf(NotesState())
     val state: State<NotesState> = _state
 
+    private val _isGrid = mutableStateOf(true)
+    val isGrid: State<Boolean> = _isGrid
+
     private var recentlyDeletedNote: Note? = null
 
     private var getNotesJob: Job? = null
@@ -43,6 +46,9 @@ class NotesViewModel @Inject constructor(
                     recentlyDeletedNote = null
                 }
             }
+            NotesEvent.GridClicked -> {
+                _isGrid.value = !isGrid.value
+            }
         }
     }
 
@@ -60,6 +66,8 @@ class NotesViewModel @Inject constructor(
     sealed class NotesEvent {
         data class DeleteNote(val note: Note) : NotesEvent()
         object RestoreNote : NotesEvent()
+
+        object GridClicked : NotesEvent()
     }
 
     data class NotesState(
