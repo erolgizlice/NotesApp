@@ -71,15 +71,15 @@ class NotesAppState(
             when (notesDestination) {
                 NotesTabs.TODO -> navController.navigateToAddEditNote(
                     navOptions = topLevelNavOptions,
-                    isTodoNote = true
+                    isTodoNote = true,
                 )
                 NotesTabs.MIC -> navController.navigateToAddEditNote(
                     navOptions = topLevelNavOptions,
-                    isTodoNote = true
+                    isMic = true
                 )
                 NotesTabs.GALLERY -> navController.navigateToAddEditNote(
                     navOptions = topLevelNavOptions,
-                    isTodoNote = true
+                    isTodoNote = true,
                 )
             }
         }

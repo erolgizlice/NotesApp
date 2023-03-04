@@ -10,10 +10,12 @@ fun NavController.navigateToAddEditNote(
     navOptions: NavOptions? = null,
     noteId: Int = -1,
     noteColor: Int = -1,
-    isTodoNote: Boolean = false
+    isTodoNote: Boolean = false,
+    isMic: Boolean = false
 ) {
     this.navigate(
-        "$addEditNoteNavigationRoute?noteId=$noteId&noteColor=$noteColor&isTodoNote=$isTodoNote",
+        "$addEditNoteNavigationRoute?noteId=$noteId&noteColor=$noteColor&" +
+                "isTodoNote=$isTodoNote&isMic=$isMic",
         navOptions
     )
 }
@@ -22,7 +24,8 @@ fun NavGraphBuilder.addEditNoteScreen(
     onBackClick: () -> Unit
 ) {
     composable(
-        route = "$addEditNoteNavigationRoute?noteId={noteId}&noteColor={noteColor}&isTodoNote={isTodoNote}",
+        route = "$addEditNoteNavigationRoute?noteId={noteId}&noteColor={noteColor}&" +
+                "isTodoNote={isTodoNote}&isMic={isMic}",
         arguments = listOf(
             navArgument(
                 name = "noteId"
@@ -41,15 +44,23 @@ fun NavGraphBuilder.addEditNoteScreen(
             ) {
                 type = NavType.BoolType
                 defaultValue = false
+            },
+            navArgument(
+                name = "isMic"
+            ) {
+                type = NavType.BoolType
+                defaultValue = false
             }
         )
     ) {
         val color = it.arguments?.getInt("noteColor") ?: -1
         val isTodoNote = it.arguments?.getBoolean("isTodoNote") ?: false
+        val isMic = it.arguments?.getBoolean("isMic") ?: false
         AddEditNoteRoute(
             onBackClick = onBackClick,
             noteColor = color,
-            isTodoNote = isTodoNote
+            isTodoNote = isTodoNote,
+            isMic = isMic
         )
     }
 }

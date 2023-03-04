@@ -1,8 +1,6 @@
 package com.erolgizlice.notesapp.feature.addeditnote
 
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.SavedStateHandle
@@ -49,6 +47,8 @@ class AddEditNoteViewModel @Inject constructor(
     private var currentNoteId: Int? = null
 
     private var recentlyDeletedNote: Note? = null
+
+    var textFromSpeech: String? by mutableStateOf(null)
 
     init {
         savedStateHandle.get<Int>("noteId")?.let { noteId ->

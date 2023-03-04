@@ -1,7 +1,12 @@
 package com.erolgizlice.notesapp.feature.addeditnote
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Bundle
+import android.speech.RecognitionListener
+import android.speech.RecognizerIntent
+import android.speech.SpeechRecognizer
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.Animatable
 import androidx.compose.animation.core.Animatable
@@ -17,6 +22,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -38,6 +44,9 @@ import com.erolgizlice.notesapp.core.model.data.TodoNote
 import com.erolgizlice.notesapp.core.ui.AlarmsBottomSheet
 import com.erolgizlice.notesapp.core.ui.ColorsBottomSheet
 import com.erolgizlice.notesapp.core.ui.SettingsBottomSheet
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -51,7 +60,8 @@ fun AddEditNoteRoute(
     onBackClick: () -> Unit,
     viewModel: AddEditNoteViewModel = hiltViewModel(),
     noteColor: Int,
-    isTodoNote: Boolean
+    isTodoNote: Boolean,
+    isMic: Boolean
 ) {
     val titleState = viewModel.noteTitle.value
     val contentState = viewModel.noteContent.value
@@ -74,6 +84,16 @@ fun AddEditNoteRoute(
         confirmStateChange = { it != ModalBottomSheetValue.HalfExpanded },
         skipHalfExpanded = true
     )
+
+    val context = LocalContext.current
+    var clickToShowPermission by rememberSaveable { mutableStateOf(true) }
+
+    if (clickToShowPermission && isMic) {
+        OpenVoiceWithPermission(
+            context = context,
+            onEvent = viewModel::onEvent
+        ) { clickToShowPermission = false }
+    }
 
     LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collectLatest { event ->
@@ -323,4 +343,67 @@ fun AddEditNoteScreen(
 
 enum class BottomSheetDisplay {
     Colors, Settings, Alarms
+}
+
+@OptIn(ExperimentalPermissionsApi::class)
+@Composable
+fun OpenVoiceWithPermission(
+    context: Context,
+    onEvent: (AddEditNoteEvent) -> Unit,
+    finished: () -> Unit
+) {
+
+    val voicePermissionState = rememberPermissionState(android.Manifest.permission.RECORD_AUDIO)
+
+    if (voicePermissionState.status.isGranted) {
+        startSpeechToText(context, finished = finished, onEvent = onEvent)
+    } else {
+        AlertDialog(
+            onDismissRequest = { /*TODO*/ },
+            title = { Text(text = "Please grant mic permission") },
+            confirmButton = {
+                Button(onClick = { voicePermissionState.launchPermissionRequest() }) {
+                    Text(text = "Request permission")
+                }
+            }
+        )
+    }
+}
+
+fun startSpeechToText(
+    context: Context,
+    finished: () -> Unit,
+    onEvent: (AddEditNoteEvent) -> Unit
+) {
+    val speechRecognizer = SpeechRecognizer.createSpeechRecognizer(context)
+    val speechRecognizerIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
+    speechRecognizerIntent.putExtra(
+        RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+        RecognizerIntent.LANGUAGE_MODEL_FREE_FORM,
+    )
+    speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "tr_TR")
+
+    speechRecognizer.setRecognitionListener(object : RecognitionListener {
+        override fun onReadyForSpeech(bundle: Bundle?) {}
+        override fun onBeginningOfSpeech() {}
+        override fun onRmsChanged(v: Float) {}
+        override fun onBufferReceived(bytes: ByteArray?) {}
+        override fun onEndOfSpeech() {
+            finished()
+        }
+
+        override fun onError(i: Int) {}
+
+        override fun onResults(bundle: Bundle) {
+            val result = bundle.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+            if (result != null) {
+                onEvent(AddEditNoteEvent.EnteredContent(result[0]))
+            }
+        }
+
+        override fun onPartialResults(bundle: Bundle) {}
+        override fun onEvent(i: Int, bundle: Bundle?) {}
+
+    })
+    speechRecognizer.startListening(speechRecognizerIntent)
 }
